@@ -1,0 +1,59 @@
+library(twitteR)
+
+setup_twitter_oauth(*PRIVATE*)
+
+ut = userTimeline("*USERNAME*",n=500)
+
+summary(ut)
+attributes(ut)
+head(ut)
+
+df <- twListToDF(ut)
+
+setwd("*LOCATION*")
+write.csv(df, file ="twitterinfo.csv")
+
+vec1 = df$text
+vec2 = df$text
+
+#extract hashes
+extract.hashes = function(vec){
+  
+  hash.pattern = "#[[:alpha:]]+"
+  have.hash = grep(x = vec, pattern = hash.pattern)
+  
+  hash.matches = gregexpr(pattern = hash.pattern,
+                          text = vec[have.hash])
+  extracted.hash = regmatches(x = vec[have.hash], m = hash.matches)
+  
+  df = data.frame(table(tolower(unlist(extracted.hash))))
+  colnames(df) = c("tag","freq")
+  df = df[order(df$freq,decreasing = TRUE),]
+  return(df)
+}
+
+hdat = head(extract.hashes(vec1),50)
+hdat2 = transform(hdat,tag = reorder(tag,freq))
+
+write.csv(hdat2, file="hashtaginfo.csv")
+
+#extract interactors
+extract.interactors = function(vec){
+  
+  interact.pattern = "@[[:alpha:]]+"
+  have.interact = grep(x = vec, pattern = interact.pattern)
+  
+  interact.matches = gregexpr(pattern = interact.pattern,
+                          text = vec[have.interact])
+  extracted.interact = regmatches(x = vec[have.interact], m = interact.matches)
+  
+  df = data.frame(table(tolower(unlist(extracted.interact))))
+  colnames(df) = c("account","freq")
+  df = df[order(df$freq,decreasing = TRUE),]
+  return(df)
+}
+
+idat = head(extract.interactors(vec2),50)
+idat2 = transform(idat,account = reorder(account,freq))
+
+write.csv(idat2, file="interactorinfo.csv")
