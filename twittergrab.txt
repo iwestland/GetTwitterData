@@ -1,17 +1,18 @@
 library(twitteR)
 
+#setup_twitter_oauth("API key", "API secret", "Access token", "Access secret")
+#This information can be found by visiting https://apps.twitter.com/ and creating a twitter app
 setup_twitter_oauth(*PRIVATE*)
 
 ut = userTimeline("*USERNAME*",n=500)
-
-summary(ut)
-attributes(ut)
-head(ut)
 
 df <- twListToDF(ut)
 
 setwd("*LOCATION*")
 write.csv(df, file ="twitterinfo.csv")
+
+
+#credit to http://www.r-bloggers.com/using-r-to-find-obamas-most-frequent-twitter-hashtags/ for these functions
 
 vec1 = df$text
 vec2 = df$text
@@ -32,11 +33,6 @@ extract.hashes = function(vec){
   return(df)
 }
 
-hdat = head(extract.hashes(vec1),50)
-hdat2 = transform(hdat,tag = reorder(tag,freq))
-
-write.csv(hdat2, file="hashtaginfo.csv")
-
 #extract interactors
 extract.interactors = function(vec){
   
@@ -53,7 +49,11 @@ extract.interactors = function(vec){
   return(df)
 }
 
+#run functions, transform data, export it
+hdat = head(extract.hashes(vec1),50)
+hdat2 = transform(hdat,tag = reorder(tag,freq))
+write.csv(hdat2, file="hashtaginfo.csv")
+
 idat = head(extract.interactors(vec2),50)
 idat2 = transform(idat,account = reorder(account,freq))
-
 write.csv(idat2, file="interactorinfo.csv")
